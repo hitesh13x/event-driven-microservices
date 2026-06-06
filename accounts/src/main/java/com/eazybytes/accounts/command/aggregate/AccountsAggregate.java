@@ -50,10 +50,10 @@ public class AccountsAggregate {
 
     @CommandHandler
     public AccountsAggregate(UpdateAccountCommand updateAccountCommand, EventStore eventStore) {
-        List<? extends DomainEventMessage<?>> list = eventStore.readEvents(updateAccountCommand.getAccountNumber().toString()).asStream().toList();
-        if (list.isEmpty()) {
-            throw new ResourceNotFoundException("Account", "AccountNumber", updateAccountCommand.getAccountNumber().toString());
-        }
+//        List<? extends DomainEventMessage<?>> list = eventStore.readEvents(updateAccountCommand.getAccountNumber().toString()).asStream().toList();
+//        if (list.isEmpty()) {
+//            throw new ResourceNotFoundException("Account", "AccountNumber", updateAccountCommand.getAccountNumber().toString());
+//        }
         AccountUpdatedEvent accountUpdatedEvent = new AccountUpdatedEvent();
         BeanUtils.copyProperties(updateAccountCommand, accountUpdatedEvent);
         AggregateLifecycle.apply(accountUpdatedEvent);
