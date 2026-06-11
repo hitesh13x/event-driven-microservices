@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @ProcessingGroup("customer-group")
-public class CardProjection {
+public class CustomerProjection {
 
     private final ICustomerService iCustomerService;
 

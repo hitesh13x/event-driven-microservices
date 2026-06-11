@@ -7,6 +7,7 @@ import com.eazybytes.accounts.command.event.AccountCreatedEvent;
 import com.eazybytes.accounts.command.event.AccountDeletedEvent;
 import com.eazybytes.accounts.command.event.AccountUpdatedEvent;
 import com.eazybytes.accounts.exception.ResourceNotFoundException;
+import com.eazybytes.common.event.AccountDataChangedEvent;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventhandling.DomainEventMessage;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -36,7 +37,11 @@ public class AccountsAggregate {
     public AccountsAggregate(CreateAccountCommand createAccountCommand) {
         AccountCreatedEvent accountCreatedEvent = new AccountCreatedEvent();
         BeanUtils.copyProperties(createAccountCommand, accountCreatedEvent);
-        AggregateLifecycle.apply(accountCreatedEvent);
+
+        AccountDataChangedEvent accountDataChangedEvent = new AccountDataChangedEvent();
+        BeanUtils.copyProperties(createAccountCommand, accountDataChangedEvent);
+
+        AggregateLifecycle.apply(accountCreatedEvent).andThenApply(() -> accountDataChangedEvent);
     }
 
     @EventSourcingHandler
@@ -50,18 +55,23 @@ public class AccountsAggregate {
 
     @CommandHandler
     public AccountsAggregate(UpdateAccountCommand updateAccountCommand, EventStore eventStore) {
-//        List<? extends DomainEventMessage<?>> list = eventStore.readEvents(updateAccountCommand.getAccountNumber().toString()).asStream().toList();
-//        if (list.isEmpty()) {
-//            throw new ResourceNotFoundException("Account", "AccountNumber", updateAccountCommand.getAccountNumber().toString());
-//        }
+        List<? extends DomainEventMessage<?>> list = eventStore.readEvents(updateAccountCommand.getAccountNumber().toString()).asStream().toList();
+        if (list.isEmpty()) {
+            throw new ResourceNotFoundException("Account", "AccountNumber", updateAccountCommand.getAccountNumber().toString());
+        }
         AccountUpdatedEvent accountUpdatedEvent = new AccountUpdatedEvent();
         BeanUtils.copyProperties(updateAccountCommand, accountUpdatedEvent);
+
+        AccountDataChangedEvent accountDataChangedEvent = new AccountDataChangedEvent();
+        BeanUtils.copyProperties(updateAccountCommand, accountDataChangedEvent);
+
         AggregateLifecycle.apply(accountUpdatedEvent);
+        AggregateLifecycle.apply(accountDataChangedEvent);
     }
 
     @EventSourcingHandler
     public void on(AccountUpdatedEvent accountUpdatedEvent) {
-        this.accountNumber = accountUpdatedEvent.getAccountNumber();
+//        this.accountNumber = accountUpdatedEvent.getAccountNumber();
         this.accountType = accountUpdatedEvent.getAccountType();
         this.branchAddress = accountUpdatedEvent.getBranchAddress();
     }

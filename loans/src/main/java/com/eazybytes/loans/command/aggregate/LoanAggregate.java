@@ -1,5 +1,6 @@
 package com.eazybytes.loans.command.aggregate;
 
+import com.eazybytes.common.event.LoanDataChangedEvent;
 import com.eazybytes.loans.command.CreateLoanCommand;
 import com.eazybytes.loans.command.DeleteLoanCommand;
 import com.eazybytes.loans.command.UpdateLoanCommand;
@@ -8,7 +9,6 @@ import com.eazybytes.loans.command.event.LoanDeletedEvent;
 import com.eazybytes.loans.command.event.LoanUpdatedEvent;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
-import org.axonframework.eventsourcing.eventstore.EventStore;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.spring.stereotype.Aggregate;
@@ -36,7 +36,11 @@ public class LoanAggregate {
     public LoanAggregate(CreateLoanCommand createCommand) {
         LoanCreatedEvent loanCreatedEvent = new LoanCreatedEvent();
         BeanUtils.copyProperties(createCommand, loanCreatedEvent);
-        AggregateLifecycle.apply(loanCreatedEvent);
+
+        LoanDataChangedEvent loanDataChangedEvent = new LoanDataChangedEvent();
+        BeanUtils.copyProperties(loanCreatedEvent, loanDataChangedEvent);
+
+        AggregateLifecycle.apply(loanCreatedEvent).andThenApply(() -> loanDataChangedEvent);
     }
 
     @EventSourcingHandler
@@ -55,7 +59,11 @@ public class LoanAggregate {
     public void handle(UpdateLoanCommand updateCommand) {
         LoanUpdatedEvent loanUpdatedEvent = new LoanUpdatedEvent();
         BeanUtils.copyProperties(updateCommand, loanUpdatedEvent);
-        AggregateLifecycle.apply(loanUpdatedEvent);
+
+        LoanDataChangedEvent loanDataChangedEvent = new LoanDataChangedEvent();
+        BeanUtils.copyProperties(updateCommand, loanDataChangedEvent);
+
+        AggregateLifecycle.apply(loanUpdatedEvent).andThenApply(() -> loanDataChangedEvent);
     }
 
     @EventSourcingHandler

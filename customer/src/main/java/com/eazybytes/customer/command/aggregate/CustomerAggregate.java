@@ -1,5 +1,6 @@
 package com.eazybytes.customer.command.aggregate;
 
+import com.eazybytes.common.event.CustomerDataChangedEvent;
 import com.eazybytes.customer.command.CreateCustomerCommand;
 import com.eazybytes.customer.command.DeleteCustomerCommand;
 import com.eazybytes.customer.command.UpdateCustomerCommand;
@@ -30,7 +31,12 @@ public class CustomerAggregate {
     public CustomerAggregate(CreateCustomerCommand createCardCommand) {
         CustomerCreatedEvent customerCreatedEvent = new CustomerCreatedEvent();
         BeanUtils.copyProperties(createCardCommand, customerCreatedEvent);
+
+        CustomerDataChangedEvent customerDataChangedEvent = new CustomerDataChangedEvent();
+        BeanUtils.copyProperties(createCardCommand, customerDataChangedEvent);
+
         AggregateLifecycle.apply(customerCreatedEvent);
+        AggregateLifecycle.apply(customerDataChangedEvent);
     }
 
     @EventSourcingHandler
@@ -50,7 +56,11 @@ public class CustomerAggregate {
         }*/
         CustomerUpdatedEvent customerUpdatedEvent = new CustomerUpdatedEvent();
         BeanUtils.copyProperties(updateCustomerCommand, customerUpdatedEvent);
-        AggregateLifecycle.apply(customerUpdatedEvent);
+
+        CustomerDataChangedEvent customerDataChangedEvent = new CustomerDataChangedEvent();
+        BeanUtils.copyProperties(updateCustomerCommand, customerDataChangedEvent);
+
+        AggregateLifecycle.apply(customerUpdatedEvent).andThenApply(() -> customerDataChangedEvent);
     }
 
     @EventSourcingHandler
