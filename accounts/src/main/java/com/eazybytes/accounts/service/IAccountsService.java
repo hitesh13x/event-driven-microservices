@@ -2,6 +2,7 @@ package com.eazybytes.accounts.service;
 
 import com.eazybytes.accounts.dto.AccountsDto;
 import com.eazybytes.accounts.entity.Accounts;
+import com.eazybytes.common.dto.MobileNumberUpdateDto;
 
 public interface IAccountsService {
 
@@ -33,4 +34,6 @@ public interface IAccountsService {
     boolean deleteAccount(Long accountNumber);
 
 
+    boolean updateMobileNumber(MobileNumberUpdateDto mobileNumberUpdateDto);
+    boolean rollbackMobileNumber(MobileNumberUpdateDto mobileNumberUpdateDto);
 }

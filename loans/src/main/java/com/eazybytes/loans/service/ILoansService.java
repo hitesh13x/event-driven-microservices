@@ -1,5 +1,6 @@
 package com.eazybytes.loans.service;
 
+import com.eazybytes.common.dto.MobileNumberUpdateDto;
 import com.eazybytes.loans.command.event.LoanUpdatedEvent;
 import com.eazybytes.loans.dto.LoansDto;
 import com.eazybytes.loans.entity.Loans;
@@ -32,5 +33,11 @@ public interface ILoansService {
      * @return boolean indicating if the delete of loan details is successful or not
      */
     boolean deleteLoan(Long loanNumber);
+
+    /**
+     * @param mobileNumberUpdateDto - MobileNumberUpdateDto object
+     * @return boolean indicating if the update of mobile number is successful or not
+     */
+    boolean updateMobileNumber(MobileNumberUpdateDto mobileNumberUpdateDto);
 
 }

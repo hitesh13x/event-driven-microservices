@@ -16,6 +16,27 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    connection-timeout: 10s
+  cloud:
+    function:
+      definition: updateCardMobileNumber;rollbackCardMobileNumber
+    stream:
+      bindings:
+        updateCardMobileNumber-in-0:
+          destination: update-card-mobile-number
+          group: ${spring.application.name}
+        updateLoanMobileNumber-out-0:
+          destination: update-loan-mobile-number
+        rollbackAccountMobileNumber-out-0:
+          destination: rollback-account-mobile-number
+        rollbackCardMobileNumber-in-0:
+          destination: rollback-card-mobile-number
+          group: ${spring.application.name}
 
 eureka:
   instance:

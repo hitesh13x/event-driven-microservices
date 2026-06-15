@@ -9,17 +9,24 @@ import com.eazybytes.cards.exception.ResourceNotFoundException;
 import com.eazybytes.cards.mapper.CardsMapper;
 import com.eazybytes.cards.repository.CardsRepository;
 import com.eazybytes.cards.service.ICardsService;
+import com.eazybytes.common.dto.MobileNumberUpdateDto;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.Optional;
 import java.util.Random;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class CardsServiceImpl implements ICardsService {
 
-    private CardsRepository cardsRepository;
+    private final CardsRepository cardsRepository;
+    private final StreamBridge streamBridge;
 
     /**
      * @param mobileNumber - Mobile Number of the Customer
@@ -88,6 +95,51 @@ public class CardsServiceImpl implements ICardsService {
                 );
         card.setActiveSw(CardsConstants.IN_ACTIVE_SW);
         cardsRepository.save(card);
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public boolean updateMobileNumber(MobileNumberUpdateDto mobileNumberUpdateDto) {
+        boolean result = false;
+        try {
+            String currentMobileNum = mobileNumberUpdateDto.getCurrentMobileNumber();
+            Cards cards = cardsRepository.findByMobileNumberAndActiveSw(currentMobileNum,
+                    true).orElseThrow(() -> new ResourceNotFoundException("Customer", "mobileNumber", currentMobileNum)
+            );
+            cards.setMobileNumber(mobileNumberUpdateDto.getNewMobileNumber());
+            cardsRepository.save(cards);
+            updateLoanMobileNumber(mobileNumberUpdateDto);
+        }catch (Exception exception) {
+            log.error("Error occurred while updating mobile number", exception);
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            rollbackAccountMobileNumber(mobileNumberUpdateDto);
+        }
+        return result;
+    }
+
+
+    private void updateLoanMobileNumber(MobileNumberUpdateDto mobileNumberUpdateDto) {
+        log.info("Sending updateLoanMobileNumber request for the details: {}", mobileNumberUpdateDto);
+        var result = streamBridge.send("updateLoanMobileNumber-out-0",mobileNumberUpdateDto);
+        log.info("Is the updateLoanMobileNumber request successfully triggered ? : {}", result);
+    }
+
+    private void rollbackAccountMobileNumber(MobileNumberUpdateDto mobileNumberUpdateDto) {
+        log.info("Sending rollbackAccountMobileNumber request for the details: {}", mobileNumberUpdateDto);
+        var result = streamBridge.send("rollbackAccountMobileNumber-out-0",mobileNumberUpdateDto);
+        log.info("Is the rollbackAccountMobileNumber request successfully triggered ? : {}", result);
+    }
+
+    @Override
+    public boolean rollbackMobileNumber(MobileNumberUpdateDto mobileNumberUpdateDto) {
+        String newMobileNumber = mobileNumberUpdateDto.getNewMobileNumber();
+        Cards cards = cardsRepository.findByMobileNumberAndActiveSw(newMobileNumber,
+                true).orElseThrow(() -> new ResourceNotFoundException("Customer", "mobileNumber", newMobileNumber)
+        );
+        cards.setMobileNumber(mobileNumberUpdateDto.getCurrentMobileNumber());
+        cardsRepository.save(cards);
+        rollbackAccountMobileNumber(mobileNumberUpdateDto);
         return true;
     }
 
