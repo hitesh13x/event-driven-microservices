@@ -36,4 +36,6 @@ public interface IAccountsService {
 
     boolean updateMobileNumber(MobileNumberUpdateDto mobileNumberUpdateDto);
     boolean rollbackMobileNumber(MobileNumberUpdateDto mobileNumberUpdateDto);
+
+    boolean updateMobileNumberOrchestor(String oldMobNumber, String newMobNumber);
 }

@@ -39,5 +39,6 @@ public interface ILoansService {
      * @return boolean indicating if the update of mobile number is successful or not
      */
     boolean updateMobileNumber(MobileNumberUpdateDto mobileNumberUpdateDto);
+    boolean updateMobileNumberOrchestor(String mobileNumber, String newMobileNumber);
 
 }

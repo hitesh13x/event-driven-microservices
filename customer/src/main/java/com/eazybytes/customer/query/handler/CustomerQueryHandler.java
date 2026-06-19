@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class CardQueryHandler {
+public class CustomerQueryHandler {
 
     private final ICustomerService iCustomerService;
 
     @QueryHandler
-    public CustomerDto findCard(FindCustomerQuery findCustomerQuery) {
+    public CustomerDto findCustomer(FindCustomerQuery findCustomerQuery) {
         return iCustomerService.fetchCustomer(findCustomerQuery.getMobileNumber());
     }
 }

@@ -119,6 +119,17 @@ public class LoansServiceImpl implements ILoansService {
         return result;
     }
 
+    @Override
+    public boolean updateMobileNumberOrchestor(String mobileNumber, String newMobileNumber) {
+        Loans loans = loansRepository.findByMobileNumberAndActiveSw(mobileNumber,
+                true).orElseThrow(() -> new ResourceNotFoundException("Customer", "mobileNumber", mobileNumber)
+        );
+        loans.setMobileNumber(newMobileNumber);
+//        throw new RuntimeException("Test Exception");
+        loansRepository.save(loans);
+        return true;
+    }
+
     private void updateMobileNumberStatus(MobileNumberUpdateDto mobileNumberUpdateDto) {
         log.info("Sending updateMobileNumberStatus request for the details: {}", mobileNumberUpdateDto);
         var result = streamBridge.send("updateMobileNumberStatus-out-0", mobileNumberUpdateDto);

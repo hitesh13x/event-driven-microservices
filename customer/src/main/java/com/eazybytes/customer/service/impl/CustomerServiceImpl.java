@@ -91,4 +91,23 @@ public class CustomerServiceImpl implements ICustomerService {
         return true;
     }
 
+    @Override
+    @Transactional
+    public boolean updateMobileNumberOrchest(String mobileNumber, String newMobileNumber) {
+        Customer customer = customerRepository.findByMobileNumberAndActiveSw(mobileNumber, true)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer", "mobileNumber", mobileNumber));
+        customer.setMobileNumber(newMobileNumber);
+        customerRepository.save(customer);
+        return true;
+    }
+
+    @Override
+    public boolean rollbackMobileNumberOrchest(String mobileNumber, String newMobileNumber) {
+        Customer customer = customerRepository.findByMobileNumberAndActiveSw(newMobileNumber, true)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer", "mobileNumber", newMobileNumber));
+        customer.setMobileNumber(mobileNumber);
+        customerRepository.save(customer);
+        return true;
+    }
+
 }

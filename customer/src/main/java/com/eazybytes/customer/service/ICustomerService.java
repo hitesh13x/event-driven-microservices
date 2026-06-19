@@ -34,4 +34,7 @@ public interface ICustomerService {
     boolean updateMobileNumber(@Valid MobileNumberUpdateDto mobileNumberUpdateDto);
 
     boolean rollbackMobileNumber(MobileNumberUpdateDto mobileNumberUpdateDto);
+
+    boolean updateMobileNumberOrchest(String mobileNumber, String newMobileNumber);
+    boolean rollbackMobileNumberOrchest(String mobileNumber, String newMobileNumber);
 }

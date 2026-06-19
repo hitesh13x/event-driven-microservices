@@ -37,4 +37,6 @@ public interface ICardsService {
     boolean rollbackMobileNumber(MobileNumberUpdateDto mobileNumberUpdateDto);
 
     boolean updateMobileNumber(MobileNumberUpdateDto mobileNumberUpdateDto);
+
+    boolean updateMobileNumberOrchestor(String mobileNumber, String newMobileNumber);
 }

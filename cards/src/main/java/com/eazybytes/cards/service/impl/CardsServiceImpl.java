@@ -118,7 +118,6 @@ public class CardsServiceImpl implements ICardsService {
         return result;
     }
 
-
     private void updateLoanMobileNumber(MobileNumberUpdateDto mobileNumberUpdateDto) {
         log.info("Sending updateLoanMobileNumber request for the details: {}", mobileNumberUpdateDto);
         var result = streamBridge.send("updateLoanMobileNumber-out-0",mobileNumberUpdateDto);
@@ -140,6 +139,16 @@ public class CardsServiceImpl implements ICardsService {
         cards.setMobileNumber(mobileNumberUpdateDto.getCurrentMobileNumber());
         cardsRepository.save(cards);
         rollbackAccountMobileNumber(mobileNumberUpdateDto);
+        return true;
+    }
+
+    @Override
+    public boolean updateMobileNumberOrchestor(String mobileNumber, String newMobileNumber) {
+        Cards cards = cardsRepository.findByMobileNumberAndActiveSw(mobileNumber,
+                true).orElseThrow(() -> new ResourceNotFoundException("Customer", "mobileNumber", mobileNumber)
+        );
+        cards.setMobileNumber(newMobileNumber);
+        cardsRepository.save(cards);
         return true;
     }
 

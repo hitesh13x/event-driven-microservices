@@ -6,6 +6,8 @@ import com.eazybytes.cards.command.event.CardUpdatedEvent;
 import com.eazybytes.cards.dto.CardsDto;
 import com.eazybytes.cards.entity.Cards;
 import com.eazybytes.cards.service.ICardsService;
+import com.eazybytes.common.event.CardMobNumRollbackedEvent;
+import com.eazybytes.common.event.CardMobileNumUpdatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
@@ -34,5 +36,15 @@ public class CardProjection {
     @EventHandler
     public void on(CardDeletedEvent cardDeletedEvent) {
         iCardsService.deleteCard(cardDeletedEvent.getCardNumber());
+    }
+
+    @EventHandler
+    public void on(CardMobileNumUpdatedEvent cardMobileNumUpdatedEvent) {
+        iCardsService.updateMobileNumberOrchestor(cardMobileNumUpdatedEvent.getMobileNumber(), cardMobileNumUpdatedEvent.getNewMobileNumber());
+    }
+
+    @EventHandler
+    public void on(CardMobNumRollbackedEvent cardMobNumRollbackedEvent) {
+        iCardsService.updateMobileNumberOrchestor(cardMobNumRollbackedEvent.getNewMobileNumber(), cardMobNumRollbackedEvent.getMobileNumber());
     }
 }

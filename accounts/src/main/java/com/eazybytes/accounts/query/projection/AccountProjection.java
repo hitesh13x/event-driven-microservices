@@ -6,6 +6,8 @@ import com.eazybytes.accounts.command.event.AccountUpdatedEvent;
 import com.eazybytes.accounts.dto.AccountsDto;
 import com.eazybytes.accounts.entity.Accounts;
 import com.eazybytes.accounts.service.IAccountsService;
+import com.eazybytes.common.event.AccntMobNumRollbackedEvent;
+import com.eazybytes.common.event.AccntMobileNumUpdatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
@@ -34,5 +36,13 @@ public class AccountProjection {
     @EventHandler
     public void on(AccountDeletedEvent event) {
         iAccountsService.deleteAccount(event.getAccountNumber());
+    }
+    @EventHandler
+    public void on(AccntMobileNumUpdatedEvent event) {
+        iAccountsService.updateMobileNumberOrchestor(event.getMobileNumber(), event.getNewMobileNumber());
+    }
+    @EventHandler
+    public void on(AccntMobNumRollbackedEvent event) {
+        iAccountsService.updateMobileNumberOrchestor(event.getNewMobileNumber(), event.getMobileNumber());
     }
 }
